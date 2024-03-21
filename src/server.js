@@ -3,11 +3,13 @@ const express = require("express");
 
 const AppError = require("./utils/app-error");
 const routes = require("./routes/index.routes");
+const { UPLOADS_FOLDER } = require("./configs/upload");
 
 const app = express();
 
 app.disable("x-powered-by");
 app.use(express.json());
+app.use("/files", express.static(UPLOADS_FOLDER));
 
 app.use(routes);
 

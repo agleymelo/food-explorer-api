@@ -18,30 +18,30 @@ class DishsController {
 
       const dishIngredients = ingredients.map((item) => item.dish_id);
 
-      dish = await knex("dishs")
-        .join("categories", "categories.id", "dishs.category_id")
+      dish = await knex("dishes")
+        .join("categories", "categories.id", "dishes.category_id")
         .select(
-          "dishs.id",
-          "dishs.name",
-          "dishs.description",
-          "dishs.price",
-          "dishs.picture",
+          "dishes.id",
+          "dishes.name",
+          "dishes.description",
+          "dishes.price",
+          "dishes.picture",
           "categories.id",
           "categories.title",
         )
-        .whereLike("dishs.name", `%${query}%`)
-        .orWhereIn("dishs.id", dishIngredients)
-        .groupBy("dishs.id")
+        .whereLike("dishes.name", `%${query}%`)
+        .orWhereIn("dishes.id", dishIngredients)
+        .groupBy("dishes.id")
         .orderBy("categories.title");
     } else {
-      dish = await knex("dishs")
-        .join("categories", "categories.id", "dishs.category_id")
+      dish = await knex("dishes")
+        .join("categories", "categories.id", "dishes.category_id")
         .select(
-          "dishs.id",
-          "dishs.name",
-          "dishs.description",
-          "dishs.price",
-          "dishs.picture",
+          "dishes.id",
+          "dishes.name",
+          "dishes.description",
+          "dishes.price",
+          "dishes.picture",
           "categories.id",
           "categories.title",
         )
@@ -53,18 +53,18 @@ class DishsController {
   async show(request, response) {
     const { id } = request.params;
 
-    const dish = await knex("dishs")
-      .join("categories", "categories.id", "dishs.category_id")
+    const dish = await knex("dishes")
+      .join("categories", "categories.id", "dishes.category_id")
       .select(
-        "dishs.id",
-        "dishs.name",
-        "dishs.description",
-        "dishs.price",
-        "dishs.picture",
+        "dishes.id",
+        "dishes.name",
+        "dishes.description",
+        "dishes.price",
+        "dishes.picture",
         "categories.id",
         "categories.title",
       )
-      .where("dishs.id", id)
+      .where("dishes.id", id)
       .first();
 
     if (!dish) {
@@ -85,7 +85,7 @@ class DishsController {
   async create(request, response) {
     const { name, description, price, category_id, ingredients } = request.body;
 
-    const [dish] = await knex("dishs").insert({
+    const [dish] = await knex("dishes").insert({
       name,
       description,
       price,
@@ -111,7 +111,7 @@ class DishsController {
     const { name, description, price, category_id, ingredients } = request.body;
     const { id } = request.params;
 
-    const dish = await knex("dishs").where({ id }).first();
+    const dish = await knex("dishes").where({ id }).first();
 
     if (!dish) {
       throw new AppError("Prato não localizado!", 404);
@@ -123,7 +123,7 @@ class DishsController {
     dish.category_id = Number(category_id) ?? dish.category_id;
 
     try {
-      await knex("dishs").where({ id }).update({
+      await knex("dishes").where({ id }).update({
         name,
         description,
         price,
@@ -151,13 +151,13 @@ class DishsController {
   async delete(request, response) {
     const { id } = request.params;
 
-    const dish = await knex("dishs").where({ id }).first();
+    const dish = await knex("dishes").where({ id }).first();
 
     if (!dish) {
       throw new AppError("Prato não localizado!", 404);
     }
 
-    await knex("dishs").where({ id }).del();
+    await knex("dishes").where({ id }).del();
 
     return response.status(204).json();
   }
