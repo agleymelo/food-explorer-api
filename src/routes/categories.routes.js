@@ -18,4 +18,10 @@ categoriesRoutes.post(
   categoriesController.create,
 );
 
+categoriesRoutes.delete(
+  "/:id",
+  verifyUserAuthorization(["admin"]),
+  categoriesController.delete,
+);
+
 module.exports = categoriesRoutes;

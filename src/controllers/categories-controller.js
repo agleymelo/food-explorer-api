@@ -21,7 +21,21 @@ class CategoriesController {
 
     const [category] = await knex("categories").insert({ title });
 
-    return response.status(201).json({ category });
+    return response.status(201).json({ id: category, title });
+  }
+
+  async delete(request, response) {
+    const { id } = request.params;
+
+    const category = await knex("categories").where({ id }).first();
+
+    if (!category) {
+      throw new AppError("Categoria não encontrada!");
+    }
+
+    await knex("categories").where({ id }).delete();
+
+    return response.status(204).json();
   }
 }
 
