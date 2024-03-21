@@ -10,6 +10,6 @@ const routes = Router();
 routes.use("/users", usersRoutes);
 routes.use("/sessions", sessionsRoutes);
 routes.use("/categories", categoriesRoutes);
-routes.use("/dishs", dishsRoutes);
+routes.use("/dishes", dishsRoutes);
 
 module.exports = routes;

@@ -1,5 +1,6 @@
 require("express-async-errors");
 const express = require("express");
+const cors = require("cors");
 
 const AppError = require("./utils/app-error");
 const routes = require("./routes/index.routes");
@@ -8,7 +9,19 @@ const { UPLOADS_FOLDER } = require("./configs/upload");
 const app = express();
 
 app.disable("x-powered-by");
+
 app.use(express.json());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://192.168.1.2:5173",
+      "http://127.0.0.1:5173",
+    ],
+    credentials: true,
+  }),
+);
+
 app.use("/files", express.static(UPLOADS_FOLDER));
 
 app.use(routes);
