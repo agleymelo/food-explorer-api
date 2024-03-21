@@ -2,6 +2,12 @@ const knex = require("../database/knex");
 const AppError = require("../utils/app-error");
 
 class CategoriesController {
+  async index(request, response) {
+    const categories = await knex("categories");
+
+    return response.status(200).json(categories);
+  }
+
   async create(request, response) {
     const { title } = request.body;
 
