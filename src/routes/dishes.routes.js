@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const multer = require("multer");
 
-const DishsController = require("../controllers/dishs-controller");
+const DishesController = require("../controllers/dishes-controller");
 const DishPictureController = require("../controllers/dish-picture-cotnroller");
 
 const ensureAuthenticated = require("../middlewares/ensure-authenticated");
@@ -9,40 +9,40 @@ const verifyUserAuthorization = require("../middlewares/verify-user-authorizatio
 
 const uploadConfig = require("../configs/upload");
 
-const dishsRoutes = Router();
-const dishsController = new DishsController();
+const dishesRoutes = Router();
+const dishesController = new DishesController();
 const dishPictureController = new DishPictureController();
 
 const upload = multer(uploadConfig.MULTER);
 
-dishsRoutes.use(ensureAuthenticated);
+dishesRoutes.use(ensureAuthenticated);
 
-dishsRoutes.get("/", dishsController.index);
-dishsRoutes.get("/:id", dishsController.show);
+dishesRoutes.get("/", dishesController.index);
+dishesRoutes.get("/:id", dishesController.show);
 
-dishsRoutes.post(
+dishesRoutes.post(
   "/",
   verifyUserAuthorization(["admin"]),
-  dishsController.create,
+  dishesController.create,
 );
 
-dishsRoutes.put(
+dishesRoutes.put(
   "/:id",
   verifyUserAuthorization(["admin"]),
-  dishsController.update,
+  dishesController.update,
 );
 
-dishsRoutes.patch(
+dishesRoutes.patch(
   "/:id/picture",
   verifyUserAuthorization(["admin"]),
   upload.single("picture"),
   dishPictureController.update,
 );
 
-dishsRoutes.delete(
+dishesRoutes.delete(
   "/:id",
   verifyUserAuthorization(["admin"]),
-  dishsController.delete,
+  dishesController.delete,
 );
 
-module.exports = dishsRoutes;
+module.exports = dishesRoutes;

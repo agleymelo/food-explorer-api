@@ -1,34 +1,49 @@
 const knex = require("../database/knex");
 const AppError = require("../utils/app-error");
 
-class DishsController {
+class DishesController {
   async index(request, response) {
-    const { name, ingredients } = request.query;
+    const { search } = request.query;
 
     let dishes;
 
-    if (ingredients) {
-      const filterIngredients = ingredients
-        .split(",")
-        .map((ingredient) => ingredient.trim());
+    if (search) {
+      const keywords = search.split(" ").map(keyword => `%${keyword}%`)
 
-      dishes = await knex("dish_ingredients")
+      dishes = await knex("dishes")
         .select([
           "dishes.id",
           "dishes.name",
           "dishes.description",
+          "dishes.category",
           "dishes.price",
           "dishes.picture",
         ])
-        .whereLike("dishes.name", `%${name}%`)
-        .whereIn("dish_ingredients.name", filterIngredients)
-        .innerJoin("dishes", "dishes.id", "dish_ingredients.dish_id")
+        .leftJoin("dish_ingredients", "dishes.id", "dish_ingredients.dish_id")
+        .where(builder => {
+          builder.where((builder_2) => {
+            keywords.forEach(keyword => {
+              builder_2.orWhere("dishes.name", "like", keyword)
+            })
+          })
+          keywords.forEach(keyword => {
+            builder.orWhere("dish_ingredients.name", "like", keyword)
+          })
+        })
         .groupBy("dishes.id")
         .orderBy("dishes.name");
+
     } else {
       dishes = await knex("dishes")
-        .whereLike("name", `%${name}%`)
-        .orderBy("name");
+        .select([
+          "dishes.id",
+          "dishes.name",
+          "dishes.description",
+          "dishes.category",
+          "dishes.price",
+          "dishes.picture",
+        ])
+        .orderBy("dishes.name");
     }
 
     const dishesIngredients = await knex("dish_ingredients");
@@ -51,15 +66,13 @@ class DishsController {
     const { id } = request.params;
 
     const dish = await knex("dishes")
-      .join("categories", "categories.id", "dishes.category_id")
+      // .join("categories", "categories.id", "dishes.category")
       .select(
         "dishes.id",
         "dishes.name",
         "dishes.description",
         "dishes.price",
         "dishes.picture",
-        "categories.id",
-        "categories.title",
       )
       .where("dishes.id", id)
       .first();
@@ -80,13 +93,13 @@ class DishsController {
   }
 
   async create(request, response) {
-    const { name, description, price, category_id, ingredients } = request.body;
+    const { name, description, price, category, ingredients } = request.body;
 
     const [dish] = await knex("dishes").insert({
       name,
       description,
       price,
-      category_id,
+      category,
     });
 
     const ingredientList = ingredients.map((item) => ({
@@ -94,18 +107,14 @@ class DishsController {
       name: item,
     }));
 
-    const dishIngredients =
-      await knex("dish_ingredients").insert(ingredientList);
+    await knex("dish_ingredients").insert(ingredientList);
 
-    console.log("DISH", dish);
-    console.log("ingredientList", ingredientList);
-    console.log("dishIngredients", dishIngredients);
 
     return response.status(201).json({ id: dish });
   }
 
   async update(request, response) {
-    const { name, description, price, category_id, ingredients } = request.body;
+    const { name, description, price, category, ingredients } = request.body;
     const { id } = request.params;
 
     const dish = await knex("dishes").where({ id }).first();
@@ -117,14 +126,14 @@ class DishsController {
     dish.name = name ?? dish.name;
     dish.description = description ?? dish.description;
     dish.price = Number(price) ?? dish.price;
-    dish.category_id = Number(category_id) ?? dish.category_id;
+    dish.category = category ?? dish.category;
 
     try {
       await knex("dishes").where({ id }).update({
         name,
         description,
         price,
-        category_id,
+        category,
       });
 
       await knex("dish_ingredients").where({ dish_id: id }).del();
@@ -162,4 +171,4 @@ class DishsController {
   }
 }
 
-module.exports = DishsController;
+module.exports = DishesController;
